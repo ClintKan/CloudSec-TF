@@ -8,10 +8,6 @@ pipeline {
                 # Verify Python installation
                 command -v python3.9 >/dev/null 2>&1 || { echo >&2 "Python 3.9 is not installed. Aborting."; exit 1; }
                 
-                sudo add-apt-repository ppa:deadsnakes/ppa
-                sudo apt update
-                sudo apt install python3.9 python3.9-venv python3.9-distutils -y
-
                 # Create virtual environment if missing
                 if [ ! -d "venv" ]; then
                     /usr/bin/env python3.9 -m venv venv
