@@ -4,9 +4,9 @@ pipeline {
         stage('Build') {
             steps {
                 sh '''#!/bin/bash
-                // set -e
-                // # Verify Python installation
-                // command -v python3.9 >/dev/null 2>&1 || { echo >&2 "Python 3.9 is not installed. Aborting."; exit 1; }
+                set -e
+                # Verify Python installation
+                command -v python3.9 >/dev/null 2>&1 || { echo >&2 "Python 3.9 is not installed. Aborting."; exit 1; }
                 
                 sudo add-apt-repository ppa:deadsnakes/ppa
                 sudo apt update
