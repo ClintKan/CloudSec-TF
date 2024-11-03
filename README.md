@@ -12,38 +12,45 @@ The vulnerabilities are categorized by different sections of the cloud infrastru
 
 - **[CRITICAL] SSH Access (Port 22):** 
   - The security group allows SSH access from anyone online (0.0.0.0/0), exposing the server to potential brute-force attacks.
+    
     **Fix:** Specify the expected CIDR block IP address(es) allowed to log in.
 
 - **[HIGH] HTTP Access (Port 80):**
   - Allowing access from 0.0.0.0/0 can expose the application to web-based attacks.
+    
     **Fix:**
     - Switch to using port 443 (HTTPS) and obtain an application certificate to encrypt data in transit, enhancing the company's reputation.
     - If port 80 is retained, utilize a Web Application Firewall (WAF) for additional security.
 
 - **[HIGH] Custom Application Port (5000):**
   - Exposing this port to the entire internet can be risky.
+    
     **Fix:** Restrict access to known IP addresses or ranges where feasible.
 
 - **[MEDIUM] Overly permissive Egress Traffic:**
   - The egress rule allows all outbound traffic.
+    
     **Fix:** Restrict egress traffic unless proven necessary for the application to minimize the attack surface.
 
 ### 2. Lack of Network Segmentation
 
 - **[MEDIUM]** 
   - The current architecture uses a single public subnet, increasing the risk of exposure and attack.
+    
     **Fix:** Separate resources and place sensitive services in private subnets with restricted access.
 
 ### 3. Missing Logging and Monitoring
 
 - **[CRITICAL]** 
   - There is no logging or monitoring solution in the configuration.
+    
     **Fix:** Use free and open-source solutions (like Prometheus, Grafana) or paid options (AWS CloudTrail, AWS Config, VPC Flow Logs) for monitoring and compliance.
 
 ### 4. Lack of Code Vulnerability Checks / Absence of CI/CD Pipeline
 
 - **[CRITICAL]** 
   - There is no stage for checking the application source code for known vulnerabilities.
+    
     **Fix:** 
     - Incorporate scanning of the application’s source code using OWASP dependency check to identify vulnerabilities prior to deployment.
     - Implement a CI/CD pipeline (e.g., Jenkins) for systematic building, testing, and security-checking.
@@ -52,6 +59,7 @@ The vulnerabilities are categorized by different sections of the cloud infrastru
 
 - **[CRITICAL]** 
   - A login log file shows signs of SQL attacks and unauthorized access attempts.
+    
     **Fix:** 
     - Monitor this log file closely and investigate any suspicious activity.
     - Implement a Web Application Firewall (WAF) to protect against SQL injection attacks.
