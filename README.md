@@ -34,22 +34,19 @@ The vulnerabilities are categorized by different sections of the cloud infrastru
 
 ### 2. Lack of Network Segmentation
 
-- **[MEDIUM]** 
-  - The current architecture uses a single public subnet, increasing the risk of exposure and attack.
+- **[MEDIUM]** The current architecture uses a single public subnet, increasing the risk of exposure and attack.
     
     **Fix:** Separate resources and place sensitive services in private subnets with restricted access.
 
 ### 3. Missing Logging and Monitoring
 
-- **[CRITICAL]** 
-  - There is no logging or monitoring solution in the configuration.
+- **[CRITICAL]** There is no logging or monitoring solution in the configuration.
     
     **Fix:** Use free and open-source solutions (like Prometheus, Grafana) or paid options (AWS CloudTrail, AWS Config, VPC Flow Logs) for monitoring and compliance.
 
 ### 4. Lack of Code Vulnerability Checks / Absence of CI/CD Pipeline
 
-- **[CRITICAL]** 
-  - There is no stage for checking the application source code for known vulnerabilities.
+- **[CRITICAL]** There is no stage for checking the application source code for known vulnerabilities.
     
     **Fix:** 
     - Incorporate scanning of the application’s source code using OWASP dependency check to identify vulnerabilities prior to deployment.
@@ -57,8 +54,7 @@ The vulnerabilities are categorized by different sections of the cloud infrastru
 
 ### 5. Lack of Close Monitoring of Login Log Files
 
-- **[CRITICAL]** 
-  - A login log file shows signs of SQL attacks and unauthorized access attempts.
+- **[CRITICAL]** A login log file shows signs of SQL attacks and unauthorized access attempts.
     
     **Fix:** 
     - Monitor this log file closely and investigate any suspicious activity.
