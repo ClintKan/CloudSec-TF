@@ -62,7 +62,7 @@ The vulnerabilities are categorized by different sections of the cloud infrastru
 
 ## IMMEDIATE FIXES IMPLEMENTED
 
-The three most critical vulnerabilities labeled “CRITICAL” were addressed immediately, while the remaining vulnerabilities are recommended for prompt resolution based on their urgency levels.
+The three most critical vulnerabilities labeled “**_CRITICAL_**” were addressed immediately, while the remaining vulnerabilities are recommended for prompt resolution based on their urgency levels.
 
 ## MOVING FORWARD
 
