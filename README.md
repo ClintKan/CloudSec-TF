@@ -1,39 +1,73 @@
-# Kura Labs Cohort 5- CyberSsecurity Workload 1
+# MICROBLOG INFRASTRUCTURE SECURITY REVIEW REPORT
 
----
+## EXECUTIVE SUMMARY
 
-## Cloud Infrastructure Security Consultant for Microblog
+This report reviews the security of Microblog’s AWS cloud infrastructure, identifying critical vulnerabilities and suggesting measures to enhance the overall security posture. The review primarily focused on the Terraform configuration (used to create the cloud infrastructure in AWS) and the source code of the Microblog application deployed on this infrastructure.
 
-### Project Overview
-**Scenario:** You’ve been hired by Microblog, a fast-growing social media startup, to secure its cloud infrastructure. Microblog has recently deployed its application on AWS, and their CTO is concerned about potential vulnerabilities that could leave the company at risk for data breaches. Recently, there have been reports of suspicious activity, unusual system behavior, and… something about suspicious characters… or was it users? Either way, your role is to conduct a thorough infrastructure security review, identify critical vulnerabilities, and implement security measures to strengthen their cloud environment.
+## IDENTIFIED VULNERABILITIES
 
-### Project Objectives
-- **Security Assessment:** Identify and analyze potential vulnerabilities within Microblog's cloud infrastructure.
-- **Mitigation and Hardening:** Implement measures to address at least **three** vulnerabilities, demonstrating an understanding of best practices in cloud security.
-- **Documentation and Recommendations:** Document your findings and outline additional vulnerabilities you identified, along with recommendations on how to address them.
+The vulnerabilities are categorized by different sections of the cloud infrastructure and tagged as “CRITICAL”, “HIGH”, “MEDIUM”, and “LOW” to indicate priority and urgency. Below is a diagram created on the draw.io platform for illustration of the initial infrastructure setup.
 
-### Instructions
+### 1. Security Group Misconfiguration
 
-- **Setup:** This project includes a `main.tf` Terraform file to provision the infrastructure and a `blog.sh` script that is referenced in the Terraform configuration. To deploy, run: `terraform apply`. This will create the initial infrastructure as specified in the Terraform configuration.
+- **[CRITICAL] SSH Access (Port 22):** 
+  - The security group allows SSH access from anyone online (0.0.0.0/0), exposing the server to potential brute-force attacks.
+  - **Fix:** Specify the expected CIDR block IP address(es) allowed to log in.
 
-- **Identify Vulnerabilities:** Review the current cloud setup and identify areas where security could be improved. Consider aspects such as network security, access controls, and data handling.
+- **[HIGH] HTTP Access (Port 80):**
+  - Allowing access from 0.0.0.0/0 can expose the application to web-based attacks.
+  - **Fix:**
+    - Switch to using port 443 (HTTPS) and obtain an application certificate to encrypt data in transit, enhancing the company's reputation.
+    - If port 80 is retained, utilize a Web Application Firewall (WAF) for additional security.
 
-- **Implement Fixes:** Select at least **three** vulnerabilities and implement fixes to mitigate them. Your choices should demonstrate an understanding of security best practices, with a focus on strengthening the infrastructure.
+- **[HIGH] Custom Application Port (5000):**
+  - Exposing this port to the entire internet can be risky.
+  - **Fix:** Restrict access to known IP addresses or ranges where feasible.
 
-- **Document Additional Findings:** Beyond the **three** you addressed, document additional vulnerabilities or areas of concern you encountered. Provide recommendations on how to mitigate these remaining risks, including any future security measures you would suggest.
+- **[MEDIUM] Overly permissive Egress Traffic:**
+  - The egress rule allows all outbound traffic.
+  - **Fix:** Restrict egress traffic unless proven necessary for the application to minimize the attack surface.
 
-#### Create Diagrams:
-- **Current State Diagram:** Use any diagramming tool (e.g., Draw.io) to map out the existing infrastructure, highlighting areas with known vulnerabilities.
-- **Secure Deployment Diagram:** Design a second diagram to illustrate your proposed secure configuration. Show how your mitigations improve the infrastructure’s security posture.
+### 2. Lack of Network Segmentation
 
-#### Submit Your Security Review:
-Compile your findings, diagrams, and recommendations in a report, following the structure provided in the deliverables section below.
+- **[MEDIUM]** 
+  - The current architecture uses a single public subnet, increasing the risk of exposure and attack.
+  - **Fix:** Separate resources and place sensitive services in private subnets with restricted access.
 
-### Documentation Deliverables
+### 3. Missing Logging and Monitoring
 
-- **Security Review Report:** A detailed report that includes:
-  - **Vulnerabilities Addressed:** Describe the **three** vulnerabilities you chose to fix, including details of the mitigation steps and best practices applied.
-  - **Additional Vulnerabilities:** List any additional vulnerabilities discovered, with brief descriptions and recommendations for mitigation.
-  - **Diagrams:** Include the Current State Diagram and Secure Deployment Diagram in your report.
-  - **Implementation Documentation:** Detail the steps taken to address each vulnerability you mitigated, along with any code changes or AWS configurations made.
-  - **Executive Summary:** A concise overview of your security review, highlighting the main findings and recommendations for Microblog's executive team.
+- **[CRITICAL]** 
+  - There is no logging or monitoring solution in the configuration.
+  - **Fix:** Use free and open-source solutions (like Prometheus, Grafana) or paid options (AWS CloudTrail, AWS Config, VPC Flow Logs) for monitoring and compliance.
+
+### 4. Lack of Code Vulnerability Checks / Absence of CI/CD Pipeline
+
+- **[CRITICAL]** 
+  - There is no stage for checking the application source code for known vulnerabilities.
+  - **Fix:** 
+    - Incorporate scanning of the application’s source code using OWASP dependency check to identify vulnerabilities prior to deployment.
+    - Implement a CI/CD pipeline (e.g., Jenkins) for systematic building, testing, and security-checking.
+
+### 5. Lack of Close Monitoring of Login Log Files
+
+- **[CRITICAL]** 
+  - A login log file shows signs of SQL attacks and unauthorized access attempts.
+  - **Fix:** 
+    - Monitor this log file closely and investigate any suspicious activity.
+    - Implement a Web Application Firewall (WAF) to protect against SQL injection attacks.
+
+## IMMEDIATE FIXES IMPLEMENTED
+
+The three most critical vulnerabilities labeled “CRITICAL” were addressed immediately, while the remaining vulnerabilities are recommended for prompt resolution based on their urgency levels.
+
+## MOVING FORWARD
+
+Regular reviews and updates to security configurations are essential to adapt to the evolving threat landscape. Moving forward, the following practices should be adhered to:
+
+- Schedule a follow-up review after implementing the recommended changes.
+- Continuously monitor the environment and update security measures as needed.
+- Educate the development team on security best practices in cloud deployments.
+
+## CONCLUSION
+
+The current AWS infrastructure of Microblog has several critical vulnerabilities that could expose the application and data to various security threats. By implementing the recommended security measures, in addition to the three implemented during this review, the organization can significantly strengthen its cloud environment and enhance its overall security posture.
