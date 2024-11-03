@@ -8,6 +8,13 @@ This report reviews the security of Microblog’s AWS cloud infrastructure, iden
 
 The vulnerabilities are categorized by different sections of the cloud infrastructure and tagged as “_CRITICAL_”, “_HIGH_”, “_MEDIUM_”, and “_LOW_” to indicate priority and urgency. Below is a diagram created on the draw.io platform for illustration of the initial infrastructure setup.
 
+<div align="center">
+  <img width="368" alt="image" src="https://github.com/user-attachments/assets/8b9ef9cc-1c11-44c7-845f-a15431f89ab5">
+</div>
+
+
+
+
 ### 1. Security Group Misconfiguration
 
 - **[_CRITICAL_] SSH Access (Port 22):** 
