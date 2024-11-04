@@ -20,13 +20,15 @@ As requested, our team assessed Microblog's infrastructure. We conducted a compr
    - Remediation of SQL injection vulnerabilities
    - Deployment of AWS security services suite (KMS, GuardDuty, Security Hub, etc.)
 
-<hr />
-
-<img src="./current_deployment.png" width="700" />
+<div align="center">
+   ![image](https://github.com/user-attachments/assets/6d788aa0-3460-4ec4-940b-ec5dbb28c3dc)
+</div>
 
 ## Dashboard View - Security Event Alerts
 
-![logllama security log analysis](chart_view.png)
+<div align="center">
+   ![image](https://github.com/user-attachments/assets/367dac41-d113-418e-9f01-96c9762d3b8c)
+</div>
 
 ---
 
@@ -34,7 +36,7 @@ As requested, our team assessed Microblog's infrastructure. We conducted a compr
 
 ### 1. Development Server in Production Environment
 - **Severity**: Critical
-- **Issue**: The application currently runs on Flask's development server in production.
+- **Issue**: The application currently running on Flask - best for development servers and not production servers, and susceptible to DDOS & MITM attacks.
 - **Evidence**: Current implementation in `blog.sh`:
 ```bash
 # Current Vulnerable Implementation
@@ -73,7 +75,7 @@ ingress {
     cidr_blocks = ["0.0.0.0/0"]
 }
 ```
-- **Solution**: Implement restricted security group rules:
+- **Solution**: Implement restricted security group rules, plus certificate for encryption of data in motion (using port 443):
 ```hcl
 # Security-Hardened Configuration
 ingress {
