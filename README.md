@@ -21,13 +21,14 @@ As requested, our team assessed Microblog's infrastructure. We conducted a compr
    - Deployment of AWS security services suite (KMS, GuardDuty, Security Hub, etc.)
 
 <div align="center">
-   (https://github.com/user-attachments/assets/6d788aa0-3460-4ec4-940b-ec5dbb28c3dc)
+	<img width="919" alt="Pasted Graphic 18" src="https://github.com/user-attachments/assets/6d788aa0-3460-4ec4-940b-ec5dbb28c3dc">
 </div>
+
 
 ## Dashboard View - Security Event Alerts
 
 <div align="center">
-   (https://github.com/user-attachments/assets/367dac41-d113-418e-9f01-96c9762d3b8c)
+	<img width="919" alt="Pasted Graphic 18" src="https://github.com/user-attachments/assets/367dac41-d113-418e-9f01-96c9762d3b8c">
 </div>
 
 ---
