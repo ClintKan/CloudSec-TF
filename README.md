@@ -1,84 +1,156 @@
-# MICROBLOG INFRASTRUCTURE SECURITY REVIEW REPORT
+# Microblog Infrastructure Security Audit Report
 
-## EXECUTIVE SUMMARY
+## Executive Summary
+As requested, our team assessed Microblog's infrastructure. We conducted a comprehensive security audit of the cloud infrastructure following reports of suspicious system behavior and unusual user activity. Our investigation revealed several critical vulnerabilities that require immediate attention to prevent potential data breaches and ensure the platform's security as the company continues its rapid growth.
 
-This report reviews the security of Microblog’s AWS cloud infrastructure, identifying critical vulnerabilities and suggesting measures to enhance the overall security posture. The review primarily focused on the Terraform configuration (used to create the cloud infrastructure in AWS) and the source code of the Microblog application deployed on this infrastructure.
+### Key Findings
+1. Critical vulnerabilities were identified in three main areas:
+   - Production environment running on insecure development server
+   - Overly permissive security group configurations
+   - SQL injection vulnerabilities in user authentication
+   
+2. Recent suspicious activities traced to:
+   - Multiple failed login attempts with SQL injection patterns shown in log, `all_logins_10_24_2024.log`
+   - Unauthorized access attempts from various global IP addresses
+   - Unusual system behavior due to development server limitations
 
-## IDENTIFIED VULNERABILITIES
+3. Primary Recommendations:
+   - Immediate migration to production-grade server infrastructure
+   - Implementation of strict security group policies
+   - Remediation of SQL injection vulnerabilities
+   - Deployment of AWS security services suite (KMS, GuardDuty, Security Hub, etc.)
 
-The vulnerabilities are categorized by different sections of the cloud infrastructure and tagged as “_CRITICAL_”, “_HIGH_”, “_MEDIUM_”, and “_LOW_” to indicate priority and urgency. Below is a diagram created on the draw.io platform for illustration of the initial infrastructure setup.
+<hr />
 
-<div align="center">
-  <img width="368" alt="image" src="https://github.com/user-attachments/assets/8b9ef9cc-1c11-44c7-845f-a15431f89ab5">
-</div>
+<img src="./current_deployment.png" width="700" />
+
+## Dashboard View - Security Event Alerts
+
+![logllama security log analysis](chart_view.png)
+
+---
+
+## Three Immediate Vulnerabilities
+
+### 1. Development Server in Production Environment
+- **Severity**: Critical
+- **Issue**: The application currently runs on Flask's development server in production.
+- **Evidence**: Current implementation in `blog.sh`:
+```bash
+# Current Vulnerable Implementation
+flask run --host=0.0.0.0 > flask.log 2>&1 &
+```
+- **Solution**: Replace with Gunicorn and systemd:
+```bash
+# Production-Grade Fix
+sudo tee /etc/systemd/system/microblog.service << EOF
+[Unit]
+Description=Microblog Gunicorn Service
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/microblog
+Environment="PATH=/home/ubuntu/microblog/venv/bin"
+ExecStart=/home/ubuntu/microblog/venv/bin/gunicorn -w 4 -b 0.0.0.0:5000 microblog:app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+
+### 2. Overly Permissive Security Groups
+- **Severity**: Critical
+- **Issue**: Unrestricted access to critical ports from any IP address
+- **Evidence**: Current security group configuration:
+```hcl
+# Current Vulnerable Configuration
+ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+}
+```
+- **Solution**: Implement restricted security group rules:
+```hcl
+# Security-Hardened Configuration
+ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["your_trusted_ip_range/32"]
+}
+
+ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+}
+```
+
+### 3. SQL Injection Vulnerabilities
+- **Severity**: Critical
+- **Issue**: Unsanitized user input in database queries
+- **Evidence**: Detected attack attempts in logs:
+```log
+Login attempt - Username: ' OR '1'='1, Password: ****
+Login attempt - Username: admin'; DROP TABLE users; --, Password: ****
+```
+- **Solution**: Implement parameterized queries:
+```python
+# Secure Implementation
+from sqlalchemy import text
+result = db.session.execute(
+    text("SELECT * FROM users WHERE username = :username"),
+    {"username": username}
+)
+```
+
+## Additional Findings
+
+1. No HTTPS in production exposes all traffic in plaintext.
+2. Passwords stored without proper hashing could lead to credential exposure.
+3. Missing rate limiting allows unlimited login attempts.
+4. No logging of successful logins makes audit trails incomplete.
+5. Unpatched dependencies could contain known vulnerabilities.
+6. Missing WAF leaves application exposed to common web attacks.
+7. No backup strategy risks permanent data loss.
+8. Plain text configuration files may expose sensitive credentials.
+9. Missing monitoring prevents early detection of security incidents.
+10. Lack of session timeouts allows indefinite access after login.
 
 
+## Compliance Considerations
+- Use frameworks such as the NIST to adhere to CIA triad
+- Implements controls for PCI DSS compliance
+- Addresses GDPR requirements for data protection
+- Aligns with SOC 2 security principles
+
+# Secure Deployment Exemplar
+
+The infrastructure diagram below illustrates an ideal secure architecture that would address the current vulnerabilities in the Microblog application. 
+
+By implementing a multi-AZ setup with proper VPC segmentation, WAF protection, and dedicated security groups across public and private subnets, it offers significant improvements over the current single-instance deployment. The addition of AWS Shield and WAF would prevent SQL injection attempts, while the separation of components into private subnets with controlled access through NGINX reverse proxies would eliminate the current security group exposure. 
+
+This architecture also incorporates proper CI/CD pipelines through Jenkins, replacing the direct Flask development server deployment with a production-grade setup, and introduces monitoring through Node Exporter - addressing all three major vulnerabilities while providing a scalable, secure foundation for future growth.
+
+![secure optimized deployment](ideal_deployment.png)
 
 
-### 1. Security Group Misconfiguration
+## Conclusion
+The identified vulnerabilities pose significant risks to Microblog's infrastructure and user data. By implementing the recommended fixes for the three critical vulnerabilities and following the proposed timeline for additional security measures, Microblog can significantly improve its security posture and protect against potential threats as it continues to scale.
 
-- **[_CRITICAL_] SSH Access (Port 22):** 
-  - The security group allows SSH access from anyone online (0.0.0.0/0), exposing the server to potential brute-force attacks.
-    
-    **Fix:** Specify the expected CIDR block IP address(es) allowed to log in.
+### Prospective Success Metrics
+- Zero critical security incidents
+- 99.9% uptime
+- Compliance with all relevant standards
+- Reduced mean time to detect (MTTD) and respond (MTTR)
 
-- **[_HIGH_] HTTP Access (Port 80):**
-  - Allowing access from 0.0.0.0/0 can expose the application to web-based attacks.
-    
-    **Fix:**
-    - Switch to using port 443 (HTTPS) and obtain an application certificate to encrypt data in transit, enhancing the company's reputation.
-    - If port 80 is retained, utilize a Web Application Firewall (WAF) for additional security.
-
-- **[_HIGH_] Custom Application Port (5000):**
-  - Exposing this port to the entire internet can be risky.
-    
-    **Fix:** Restrict access to known IP addresses or ranges where feasible.
-
-- **[_MEDIUM_] Overly permissive Egress Traffic:**
-  - The egress rule allows all outbound traffic.
-    
-    **Fix:** Restrict egress traffic unless proven necessary for the application to minimize the attack surface.
-
-### 2. Lack of Network Segmentation
-
-- **[_MEDIUM_]** The current architecture uses a single public subnet, increasing the risk of exposure and attack.
-    
-    **Fix:** Separate resources and place sensitive services in private subnets with restricted access.
-
-### 3. Missing Logging and Monitoring
-
-- **[_CRITICAL_]** There is no logging or monitoring solution in the configuration.
-    
-    **Fix:** Use free and open-source solutions (like Prometheus, Grafana) or paid options (AWS CloudTrail, AWS Config, VPC Flow Logs) for monitoring and compliance.
-
-### 4. Lack of Code Vulnerability Checks / Absence of CI/CD Pipeline
-
-- **[_CRITICAL_]** There is no stage for checking the application source code for known vulnerabilities.
-    
-    **Fix:** 
-    - Incorporate scanning of the application’s source code using OWASP dependency check to identify vulnerabilities prior to deployment.
-    - Implement a CI/CD pipeline (e.g., Jenkins) for systematic building, testing, and security-checking.
-
-### 5. Lack of Close Monitoring of Login Log Files
-
-- **[_CRITICAL_]** A login log file shows signs of SQL attacks and unauthorized access attempts.
-    
-    **Fix:** 
-    - Monitor this log file closely and investigate any suspicious activity.
-    - Implement a Web Application Firewall (WAF) to protect against SQL injection attacks.
-
-## IMMEDIATE FIXES IMPLEMENTED
-
-The three most critical vulnerabilities labeled “**_CRITICAL_**” were addressed immediately, while the remaining vulnerabilities are recommended for prompt resolution based on their urgency levels.
-
-## MOVING FORWARD
-
-Regular reviews and updates to security configurations are essential to adapt to the evolving threat landscape. Moving forward, the following practices should be adhered to:
-
-- Schedule a follow-up review after implementing the recommended changes.
-- Continuously monitor the environment and update security measures as needed.
-- Educate the development team on security best practices in cloud deployments.
-
-## CONCLUSION
-
-The current AWS infrastructure of Microblog has several critical vulnerabilities that could expose the application and data to various security threats. By implementing the recommended security measures, in addition to the three implemented during this review, the organization can significantly strengthen its cloud environment and enhance its overall security posture.
+### Team Members
+- **[Kevin Gonzalez](https://github.com/kevingonzalez7997)**
+- **[Shafee Ahmed](https://github.com/shafeeshafee)**
+- **[Clinton Kanyali](https://github.com/clintkan)**
+- **[Uzo Bolarinwa](https://github.com/uzobola)**
