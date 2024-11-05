@@ -112,16 +112,6 @@ resource "aws_security_group" "web_sg" {
     description = "HTTPS access - encrypted web traffic"
   }
 
-  # HTTP Configuration
-  # Security Note: HTTP is only allowed for initial connections
-  # Should be configured to redirect to HTTPS
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "HTTP access - should redirect to HTTPS"
-  }
 
   # Application Port Configuration
   # Security Hardening: Internal application port access restricted to VPC
@@ -138,15 +128,6 @@ resource "aws_security_group" "web_sg" {
   # Security Best Practice: Implement strict egress rules
   # Only allow necessary outbound traffic based on application requirements
   
-  # HTTP Outbound
-  egress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "HTTP outbound - for package updates and external services"
-  }
-
   # HTTPS Outbound
   egress {
     from_port   = 443
