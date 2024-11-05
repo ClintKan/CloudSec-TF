@@ -1,9 +1,49 @@
 # Microblog Infrastructure Security Audit Report
 
----
-
 ## Executive Summary
-As requested, our team assessed Microblog's infrastructure. We conducted a comprehensive security audit of the cloud infrastructure following reports of suspicious system behavior and unusual user activity. Our investigation revealed several critical vulnerabilities that require immediate attention to prevent potential data breaches and ensure the platform's security as the company continues its rapid growth.
+
+#### Security Auditors: Shafee Ahmed, Uzo Bolarinwa, Clint Kanyali
+
+As requested, our team assessed Microblog's infrastructure following reports of suspicious system behavior and unusual user activity. Our comprehensive security audit revealed several critical vulnerabilities that require immediate attention to prevent potential data breaches and ensure the platform's security as the company continues its rapid growth.
+
+### Security Assessment Overview
+Our review identified multiple security concerns requiring immediate attention. The assessment focused on:
+- Network security architecture and configurations
+- Access control mechanisms and policies
+- Data handling practices and encryption
+- Application security and deployment practices
+- Monitoring and incident response capabilities
+
+### Current State Assessment
+Our analysis of the current infrastructure revealed several security gaps and areas for improvement. The following diagram illustrates the initial deployment:
+
+<div align="center">
+	<img width="618" alt="image" src="https://github.com/user-attachments/assets/8f6a128d-6a0d-42e5-9de0-f86c778a00f1">
+</div>
+
+
+### Project Implementation Steps
+
+1. **Initial Infrastructure Assessment**
+   - Reviewed existing AWS architecture and configurations
+   - Analyzed current security group settings and network access rules
+   - Evaluated application deployment practices
+
+2. **Vulnerability Analysis**
+   - Performed detailed analysis of security logs and files in the application source code.
+   - Identified critical security gaps in current deployment
+   - Documented suspicious activity patterns
+
+3. **Security Improvements Implementation**
+   - Developed hardened security group configurations
+   - Implemented HTTPS with proper SSL/TLS
+   - Configured WAF rules and protection
+   - Established secure CI/CD pipeline
+
+4. **Testing and Validation**
+   - Validated security group changes
+   - Tested application security improvements
+   - Verified monitoring and logging functionality
 
 ### Critical Assets Requiring Protection
 - **Infrastructure Components**
@@ -33,19 +73,8 @@ Critical vulnerabilities were identified in three main areas:
    - Insufficient data encryption
    - Inadequate access controls
 
-### Primary Recommendations
-- Immediate migration to production-grade server infrastructure
-- Implementation of strict security group policies
-- Remediation of SQL injection vulnerabilities
-- Deployment of AWS security services suite (KMS, GuardDuty, Security Hub, etc.)
-
-
-<div align="center">
-	<img width="618" alt="image" src="https://github.com/user-attachments/assets/8f6a128d-6a0d-42e5-9de0-f86c778a00f1">
-</div>
-
-
-## Dashboard View - Security Event Alerts
+### Security Event Analysis
+Current security monitoring has detected numerous suspicious events:
 
 <div align="center">
 	<img width="919" alt="Pasted Graphic 18" src="https://github.com/user-attachments/assets/367dac41-d113-418e-9f01-96c9762d3b8c">
@@ -53,9 +82,19 @@ Critical vulnerabilities were identified in three main areas:
 
 ---
 
-## Three Immediate Vulnerabilities
+### Primary Recommendations
+- Immediate migration to production-grade server infrastructure
+- Implementation of strict security group policies
+- Remediation of SQL injection vulnerabilities
+- Deployment of AWS security services suite (KMS, GuardDuty, Security Hub, etc.)
 
-### 1. Development Server in Production Environment
+---
+
+## Vulnerability Assessment & Remediation
+
+### Three Critical Vulnerabilities Addressed
+
+#### 1. Development Server in Production Environment
 - **Severity**: Critical
 - **Issue**: The application currently runs on Flask's development server in production
 - **Evidence**: 
@@ -89,7 +128,7 @@ Critical vulnerabilities were identified in three main areas:
   EOF
   ```
 
-### 2. Overly Permissive Security Groups
+#### 2. Overly Permissive Security Groups
 - **Severity**: Critical
 - **Issues Identified**:
   - Unrestricted SSH access (Port 22) open to all IP addresses
@@ -109,7 +148,7 @@ Critical vulnerabilities were identified in three main areas:
 - **Solution**: 
   - Implement network segmentation with public/private subnets
   - Restrict security group rules to specific CIDRs
-  - Configure HTTPS with proper SSL/TLS termination, and add purchased certificate from CA
+  - Configure HTTPS with proper SSL/TLS termination
   - Implement strict egress rules based on least privilege:
   ```hcl
   # Security-Hardened Configuration
@@ -128,7 +167,7 @@ Critical vulnerabilities were identified in three main areas:
   }
   ```
 
-### 3. SQL Injection Vulnerabilities
+#### 3. SQL Injection Vulnerabilities
 - **Severity**: Critical
 - **Issue**: Unsanitized user input in database queries
 - **Attack Patterns Detected**:
@@ -145,7 +184,7 @@ Critical vulnerabilities were identified in three main areas:
   Login attempt - Username: ' OR '1'='1, Password: ****
   Login attempt - Username: admin'; DROP TABLE users; --, Password: ****
   ```
-- **Solution**: Removed password logging. Remove password enumeration:
+- **Solution**: Remove password logging. Prevent password enumeration:
   ```python
   # CloudSec-TF update: removed password logging
           logging.info(f"Login attempt - Username: {username}")
@@ -158,46 +197,87 @@ Critical vulnerabilities were identified in three main areas:
               return redirect(url_for('auth.login'))
   ```
 
-## Additional Findings
+### Implementation Details
+Here are the specific steps taken to address each vulnerability:
 
-1. No HTTPS in production exposes all traffic in plaintext.
-2. Passwords stored without proper hashing could lead to credential exposure.
-3. Missing rate limiting allows unlimited login attempts.
-4. No logging of successful logins makes audit trails incomplete.
-5. Unpatched dependencies could contain known vulnerabilities.
-6. Missing WAF leaves application exposed to common web attacks.
-7. No backup strategy risks permanent data loss.
-8. Plain text configuration files may expose sensitive credentials.
-9. Missing monitoring prevents early detection of security incidents.
-10. Lack of session timeouts allows indefinite access after login.
+1. **Development Server Fix**
+   * Implemented Gunicorn
+   * Configured systemd service
+   * Validated production deployment
 
-## Compliance Considerations
+2. **Security Groups Hardening**
+   * Implemented strict ingress rules
+   * Configured HTTPS
+   * Validated access controls
+
+3. **SQL Injection Prevention**
+   * Implemented input sanitization
+   * Removed sensitive logging
+   * Added prepared statements
+
+### Additional Security Findings
+
+1. No HTTPS in production exposes all traffic in plaintext
+2. Passwords stored without proper hashing could lead to credential exposure
+3. Missing rate limiting allows unlimited login attempts
+4. No logging of successful logins makes audit trails incomplete
+5. Unpatched dependencies could contain known vulnerabilities
+6. Missing WAF leaves application exposed to common web attacks
+7. No backup strategy risks permanent data loss
+8. Plain text configuration files may expose sensitive credentials
+9. Missing monitoring prevents early detection of security incidents
+10. Lack of session timeouts allows indefinite access after login
+
+---
+
+# Secure Deployment Design
+The infrastructure diagram below illustrates our recommended secure architecture that addresses the current vulnerabilities in the Microblog application:
+
+
+![secure optimized deployment](ideal_deployment.png)
+
+## This new architecture incorporates:
+
+By implementing a multi-AZ setup with proper VPC segmentation, WAF protection, and dedicated security groups across public and private subnets, it offers significant improvements over the current single-instance deployment. The addition of AWS Shield and WAF would prevent SQL injection attempts, while the separation of components into private subnets with controlled access through NGINX reverse proxies would eliminate the current security group exposure.
+
+This architecture also incorporates proper CI/CD pipelines through Jenkins, replacing the direct Flask development server deployment with a production-grade setup, and introduces monitoring through Node Exporter - addressing all three major vulnerabilities while providing a scalable, secure foundation for future growth.
+
+*In a nutshell:*
+- Multi-AZ setup with proper VPC segmentation
+- WAF protection
+- Dedicated security groups across public and private subnets
+- AWS Shield integration
+- NGINX reverse proxies
+- CI/CD pipelines through Jenkins
+- Monitoring through Node Exporter
+- AWS Security Services Integration
+- AWS WAF + Shield for DDOS protection and web filtering
+  Additional AWS Security Services Recommendations:
+  - KMS for encryption
+  - Secrets Manager for credentials
+  - GuardDuty for threat detection
+  - Security Hub for security posture management
+  - CloudTrail for audit logging
+  - Config for compliance
+
+---
+
+## Compliance & Future Considerations
+
+### Regulatory Compliance
 - Use frameworks such as the NIST to adhere to CIA triad
 - Implements controls for PCI DSS compliance
 - Addresses GDPR requirements for data protection
 - Aligns with SOC 2 security principles
 
----
-
-# Secure Deployment Exemplar
-
-The infrastructure diagram below illustrates an ideal secure architecture that would address the current vulnerabilities in the Microblog application. 
-
-By implementing a multi-AZ setup with proper VPC segmentation, WAF protection, and dedicated security groups across public and private subnets, it offers significant improvements over the current single-instance deployment. The addition of AWS Shield and WAF would prevent SQL injection attempts, while the separation of components into private subnets with controlled access through NGINX reverse proxies would eliminate the current security group exposure. 
-
-This architecture also incorporates proper CI/CD pipelines through Jenkins, replacing the direct Flask development server deployment with a production-grade setup, and introduces monitoring through Node Exporter - addressing all three major vulnerabilities while providing a scalable, secure foundation for future growth.
-
-![secure optimized deployment](ideal_deployment.png)
-
-
-## Conclusion
-The identified vulnerabilities pose significant risks to Microblog's infrastructure and user data. By implementing the recommended fixes for the three critical vulnerabilities and following the proposed timeline for additional security measures, Microblog can significantly improve its security posture and protect against potential threats as it continues to scale.
-
-### Prospective Success Metrics
+### Success Metrics
 - Zero critical security incidents
 - 99.9% uptime
 - Compliance with all relevant standards
 - Reduced mean time to detect (MTTD) and respond (MTTR)
+
+## Conclusion
+The identified vulnerabilities pose significant risks to Microblog's infrastructure and user data. By implementing the recommended fixes for the three critical vulnerabilities and following the proposed timeline for additional security measures, Microblog can significantly improve its security posture and protect against potential threats as it continues to scale.
 
 ---
 
