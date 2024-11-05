@@ -21,7 +21,7 @@ As requested, our team assessed Microblog's infrastructure. We conducted a compr
    - Deployment of AWS security services suite (KMS, GuardDuty, Security Hub, etc.)
 
 <div align="center">
-	<img width="919" alt="Pasted Graphic 18" src="https://github.com/user-attachments/assets/6d788aa0-3460-4ec4-940b-ec5dbb28c3dc">
+	<img width="618" alt="image" src="https://github.com/user-attachments/assets/8f6a128d-6a0d-42e5-9de0-f86c778a00f1">
 </div>
 
 
