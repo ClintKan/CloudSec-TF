@@ -9,26 +9,38 @@ from app.auth.forms import LoginForm, RegistrationForm, \
     ResetPasswordRequestForm, ResetPasswordForm
 from app.models import User
 from app.auth.email import send_password_reset_email
+import sqlalchemy as sa
+from sqlalchemy import text 
+import logging
 
+logging.basicConfig(filename='all_logins.log', level=logging.INFO)
 
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
     form = LoginForm()
+    
     if form.validate_on_submit():
-        user = db.session.scalar(
-            sa.select(User).where(User.username == form.username.data))
+        username = form.username.data
+        
+        # CloudSec-TF update: removed password logging
+        logging.info(f"Login attempt - Username: {username}")
+        
+        user = User.query.filter_by(username=username).first()
+
+        # CloudSec-TF update: prevent username enumeration
         if user is None or not user.check_password(form.password.data):
             flash(_('Invalid username or password'))
             return redirect(url_for('auth.login'))
+        
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
         if not next_page or urlsplit(next_page).netloc != '':
             next_page = url_for('main.index')
         return redirect(next_page)
+    
     return render_template('auth/login.html', title=_('Sign In'), form=form)
-
 
 @bp.route('/logout')
 def logout():
