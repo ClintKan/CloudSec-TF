@@ -96,7 +96,7 @@ Current security monitoring has detected numerous suspicious events:
 
 #### 1. Development Server in Production Environment
 - **Severity**: Critical
-- **Issue**: The application currently runs on Flask's development server in production with a log that harvests and logs username and passwords.
+- **Issue**: The application currently runs on Flask's development server in production with the logging of username and passwords on every login attempt.
 - **Evidence**: 
   ```log
   INFO:werkzeug:WARNING: This is a development server. Do not use it in a production deployment.
