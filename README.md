@@ -96,7 +96,7 @@ Current security monitoring has detected numerous suspicious events:
 
 #### 1. Development Server in Production Environment
 - **Severity**: Critical
-- **Issue**: The application currently runs on Flask's development server in production
+- **Issue**: The application currently runs on Flask's development server in production with a log that harvests and logs username and passwords.
 - **Evidence**: 
   ```log
   INFO:werkzeug:WARNING: This is a development server. Do not use it in a production deployment.
@@ -108,7 +108,8 @@ Current security monitoring has detected numerous suspicious events:
   - Lacks security hardening
   - Debug mode exposed (remote code execution risk)
   - No worker management or graceful restarts
-- **Solution**: Replace with Gunicorn and systemd:
+- **Solutions**:
+  a). Replace with Gunicorn and systemd:
   ```bash
   # Production-Grade Fix
   sudo tee /etc/systemd/system/microblog.service << EOF
@@ -127,6 +128,13 @@ Current security monitoring has detected numerous suspicious events:
   WantedBy=multi-user.target
   EOF
   ```
+
+  b). Updating the /app/auth/routes.py file to not log passwords of any login attempts.
+  <div align="center">
+	<img width="919" alt="Pasted Graphic 18" src="https://github.com/user-attachments/assets/904722cb-97ab-431f-aca5-c5e95025ace9">
+  </div>
+
+
 
 #### 2. Overly Permissive Security Groups
 - **Severity**: Critical
